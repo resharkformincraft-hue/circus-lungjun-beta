@@ -4,7 +4,9 @@ export const COLORS=['RED','YELLOW','GREEN','BLUE'];
 export const LETTERS=['A','B','C','D','E','F','G','H','I'];
 export const TYPES={LETTER:'LETTER',DOUBLE:'DOUBLE',TRIPLE:'TRIPLE',DRAW_FOUR:'DRAW_FOUR',BACKWORD:'BACKWORD',SKIP:'SKIP',JOKER:'JOKER',JOKER_BACKWORD:'JOKER_BACKWORD',JOKER_X2:'JOKER_X2',RESET_PLUS2_ALL:'RESET_PLUS2_ALL'};
 const id=()=>crypto.randomUUID();
-const card=(type,color=null,letter=null)=>({id:id(),type,color,letter});
+const CARD_VALUES={A:-1,B:-2,C:-3,D:-4,E:-5,F:-6,G:-7,H:-8,I:-9,DOUBLE:-20,TRIPLE:-30,DRAW_FOUR:-40,BACKWORD:-20,SKIP:-20,JOKER:-70,JOKER_BACKWORD:-70,JOKER_X2:-140,RESET_PLUS2_ALL:-70};
+export const cardValue=c=>c?.type==='LETTER'?(CARD_VALUES[c.letter]||0):(CARD_VALUES[c?.type]||0);
+const card=(type,color=null,letter=null)=>({id:id(),type,color,letter,value:cardValue({type,letter})});
 export const isPlusType=t=>[TYPES.DOUBLE,TYPES.TRIPLE,TYPES.DRAW_FOUR].includes(t);
 export const plusAmount=t=>t===TYPES.DOUBLE?2:t===TYPES.TRIPLE?3:t===TYPES.DRAW_FOUR?4:0;
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -79,7 +81,7 @@ export function canPlayCard(s,pid,cid,{insert=false,chosenColor=null}={}){
  if(s.phase==='LAST_DANCE'){
    if(c.type===TYPES.DRAW_FOUR)return {ok:true};
    if(isPlusType(c.type))return {ok:!s.pendingEffect||s.pendingEffect.stackType===c.type,reason:'STACK_TYPE_MISMATCH'};
-   if(c.type===TYPES.BACKWORD||c.type===TYPES.SKIP)return {ok:!s.pendingEffect&&validColor(c,s.currentColor),reason:'MUST_MATCH_COLOR'};
+   if(c.type===TYPES.BACKWORD||c.type===TYPES.SKIP)return {ok:!s.pendingEffect,reason:'INVALID_CARD'};
    if(c.type===TYPES.LETTER)return {ok:!s.pendingEffect&&matchLetter(c,t,s.currentColor),reason:'INVALID_CARD'};
  }
  if(c.type===TYPES.DRAW_FOUR){
@@ -88,14 +90,14 @@ export function canPlayCard(s,pid,cid,{insert=false,chosenColor=null}={}){
  }
  if(isPlusType(c.type)){
    if(s.pendingEffect&&s.pendingEffect.stackType!==c.type)return {ok:false,reason:'STACK_TYPE_MISMATCH'};
-   if(s.pendingEffect)return validColor(c,s.pendingEffect.color)?{ok:true}:{ok:false,reason:'COLOR_MISMATCH'};
-   return {ok:!t||c.color===s.currentColor||c.type===t.type||c.color===t.color,reason:'INVALID_CARD'};
+   if(s.pendingEffect)return {ok:true};
+   return {ok:true};
  }
  if(c.type===TYPES.BACKWORD){
    if(s.pendingEffect)return validColor(c,s.pendingEffect.color)?{ok:true}:{ok:false,reason:'COLOR_MISMATCH'};
-   return {ok:validColor(c,s.currentColor),reason:'MUST_MATCH_COLOR'};
+   return {ok:true};
  }
- if(c.type===TYPES.SKIP){return {ok:!s.pendingEffect&&validColor(c,s.currentColor),reason:'MUST_MATCH_COLOR'};}
+ if(c.type===TYPES.SKIP){return {ok:!s.pendingEffect,reason:'INVALID_CARD'};}
  if(c.type===TYPES.LETTER)return {ok:!s.pendingEffect&&matchLetter(c,t,s.currentColor),reason:'INVALID_CARD'};
  return {ok:false,reason:'INVALID_CARD'};
 }
@@ -204,23 +206,18 @@ export function validateAction(state,pid,action){
 }
 
 export function scoreGame(s){
- const ordered=s.players.map(p=>({userId:p.id,cards:p.hand.length}));
- if(s.lastDance && !s.winnerId){
-   const sorted=ordered.slice().sort((a,b)=>a.cards-b.cards);
-   const third=sorted[2]?.cards;
-   return ordered.map(x=>({...x,points:third!==undefined&&x.cards<=third?1:0,rank:sorted.findIndex(y=>y.userId===x.userId)+1,win:0}));
- }
+ const ordered=s.players.map(p=>({userId:p.id,cards:p.hand.length,difference:p.hand.reduce((sum,c)=>sum+cardValue(c),0)}));
+ const sortByDifference=(a,b)=>b.difference-a.difference || a.cards-b.cards;
  if(s.winnerId){
-   const rest=ordered.filter(x=>x.userId!==s.winnerId).sort((a,b)=>a.cards-b.cards);
-   const distinct=[...new Set(rest.map(x=>x.cards))];
-   const secondDifference=distinct[0];
+   const rest=ordered.filter(x=>x.userId!==s.winnerId).sort(sortByDifference);
+   const second=rest[0]?.difference;
    return ordered.map(x=>{
      if(x.userId===s.winnerId)return {...x,points:3,rank:1,win:1};
-     const bonus=secondDifference!==undefined&&x.cards===secondDifference?1:0;
-     return {...x,points:bonus,rank:1+(distinct.indexOf(x.cards)+1),win:0};
+     const bonus=second!==undefined&&x.difference===second?1:0;
+     return {...x,points:bonus,rank:2+(rest.findIndex(y=>y.userId===x.userId)),win:0};
    });
  }
- const sorted=ordered.slice().sort((a,b)=>a.cards-b.cards);
- const third=sorted[2]?.cards;
- return ordered.map(x=>({...x,points:third!==undefined&&x.cards<=third?1:0,rank:sorted.findIndex(y=>y.userId===x.userId)+1,win:0}));
+ const sorted=ordered.slice().sort(sortByDifference);
+ const top3=sorted.slice(0,3);
+ return ordered.map(x=>({...x,points:top3.some(y=>y.userId===x.userId)?1:0,rank:sorted.findIndex(y=>y.userId===x.userId)+1,win:0}));
 }

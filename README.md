@@ -51,3 +51,13 @@ npm test
 ```
 
 `npm test` is configured in package.json and covers deck size, deal/start, INSERT gating, stacking, RESET +2 ALL, CIRCUS punishment and basic scoring.
+
+
+## Render deployment (mobile-safe)
+This project is intentionally pinned to Node 22 (`.node-version` and `package.json`). The repository root must contain `server/index.js` and `package.json`; do not upload the project as a nested `circus-lungjun-beta/circus-lungjun-beta` directory.
+
+Render Build Command: `npm install`
+Render Start Command: `npm start`
+Environment variable (optional but recommended): `NODE_VERSION=22.23.3`
+
+The `1V1` room mode forces exactly 2 players.

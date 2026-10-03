@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeDeck,initialState,validateAction,applyAction,scoreGame,TYPES,COLORS} from '../server/game.js';
+import {makeDeck,initialState,validateAction,applyAction,canPlayCard,scoreGame,TYPES,COLORS} from '../server/game.js';
 
 test('deck has exactly 112 cards',()=>{const d=makeDeck();assert.equal(d.length,112);assert.equal(d.filter(c=>c.type===TYPES.LETTER).length,72);assert.equal(d.filter(c=>c.type===TYPES.DOUBLE).length,8);assert.equal(d.filter(c=>c.type===TYPES.TRIPLE).length,8);assert.equal(d.filter(c=>c.type===TYPES.DRAW_FOUR).length,4);assert.equal(d.filter(c=>c.type===TYPES.BACKWORD).length,8);assert.equal(d.filter(c=>c.type===TYPES.SKIP).length,8);});
 
@@ -17,3 +17,17 @@ test('circus caller can punish one-card target',()=>{const s=initialState([{id:'
 test('score winner gets three points and a second-place card-count tie gets one',()=>{const s=initialState([{id:'a',name:'A'},{id:'b',name:'B'},{id:'c',name:'C'}]);s.winnerId='a';s.players[0].hand=[];s.players[1].hand=[{},{}];s.players[2].hand=[{},{}];const r=scoreGame(s);assert.equal(r.find(x=>x.userId==='a').points,3);assert.equal(r.find(x=>x.userId==='b').points,1);assert.equal(r.find(x=>x.userId==='c').points,1);});
 
 test('last dance ends after everyone passes once',()=>{const s=initialState([{id:'a',name:'A'},{id:'b',name:'B'}]);s.phase='LAST_DANCE';s.lastDance=true;s.currentPlayerId='a';s.players.forEach(p=>p.hand=[]);let n=applyAction(s,'a',{type:'PASS'});assert.equal(n.phase,'LAST_DANCE');n=applyAction(n,'b',{type:'PASS'});assert.equal(n.phase,'GAME_FINISHED');assert.equal(n.winnerId,null);});
+
+
+test('special cards can be played across colors',()=>{
+ const s=initialState([{id:'a',name:'A'},{id:'b',name:'B'}]);
+ s.phase='PLAYING';s.currentPlayerId='a';s.currentColor='RED';s.discardPile=[{id:'top',type:TYPES.LETTER,color:'RED',letter:'A',value:-1}];
+ s.players[0].hand=[{id:'x',type:TYPES.SKIP,color:'BLUE',letter:null,value:-20},{id:'y',type:TYPES.BACKWORD,color:'GREEN',letter:null,value:-20}];
+ assert.equal(canPlayCard(s,'a','x').ok,true);assert.equal(canPlayCard(s,'a','y').ok,true);
+});
+
+test('difference uses the printed card values',()=>{
+ const s=initialState([{id:'a',name:'A'},{id:'b',name:'B'}]);
+ s.winnerId='a';s.players[0].hand=[];s.players[1].hand=[{id:'1',type:TYPES.DOUBLE,value:-20},{id:'2',type:TYPES.DRAW_FOUR,value:-40},{id:'3',type:TYPES.JOKER,value:-70}];
+ const r=scoreGame(s).find(x=>x.userId==='b');assert.equal(r.difference,-130);
+});
