@@ -1,0 +1,13 @@
+services:
+  circus-lungjun:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in your environment}
+    volumes:
+      - circus_data:/app/data
+    restart: unless-stopped
+volumes:
+  circus_data:

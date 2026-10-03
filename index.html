@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="th">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fffbf3"><title>CIRCUS LUNGJUN BETA</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<div id="toast"></div>
+<main id="app">
+<section id="auth" class="screen authScreen">
+  <div class="heroBrand"><div class="tent">🎪</div><h1>CIRCUS<br><strong>LUNGJUN</strong></h1><span>BETA ONLINE</span></div>
+  <div class="panel authPanel"><div class="tabs"><button id="loginTab" class="active">LOGIN</button><button id="registerTab">CREATE ACCOUNT</button></div>
+    <form id="authForm"><label>Username<input id="username" autocomplete="username" minlength="3" maxlength="24" required></label><label>Password<input id="password" type="password" autocomplete="current-password" minlength="6" required></label><label id="confirmWrap" class="hidden">Confirm password<input id="confirmPassword" type="password" minlength="6"></label><button class="primary wide" type="submit" id="authSubmit">ENTER CIRCUS</button></form><p id="authMsg" class="msg"></p>
+  </div>
+</section>
+
+<section id="home" class="screen hidden">
+<header class="topbar"><div class="brandMini">🎪 <b>CIRCUS LUNGJUN</b><span>BETA</span></div><div class="topActions"><button id="muteBtn">🔊</button><button id="profileBtn">PROFILE</button><button id="logoutBtn">LOGOUT</button></div></header>
+<div class="homeLayout"><div><div class="eyebrow">WELCOME BACK</div><h2 id="homeGreeting">—</h2><p class="muted">Choose your arena. Every match is server-authoritative.</p><div class="homeMenu"><button class="primary heroBtn" id="playBtn">🎪 PLAY</button><button class="heroBtn" id="leagueBtn">🏆 LEAGUE</button><button class="heroBtn" id="howBtn">📖 HOW TO PLAY</button><button class="heroBtn" id="settingsBtn">⚙ SETTINGS</button></div></div>
+<div class="panel profileCard"><div class="avatarXL" id="homeAvatar">🎪</div><h3 id="homeName">—</h3><p id="homeStats">—</p><div class="statRow"><span>League <b id="homePoints">0</b></span><span>Wins <b id="homeWins">0</b></span></div></div></div>
+</section>
+
+<section id="lobby" class="screen hidden"><header class="topbar"><button id="lobbyBack">← HOME</button><h2>PLAY</h2><span></span></header><div class="choiceGrid"><button class="choiceCard primary" id="createBtn"><b>CREATE ROOM</b><small>Host a new match</small></button><button class="choiceCard" id="joinBtn"><b>JOIN ROOM</b><small>Enter a room code</small></button></div>
+<div id="createPanel" class="panel formPanel hidden"><h3>CREATE ROOM</h3><div class="modeSelect"><button data-mode="SIMPLE" class="mode active">SIMPLE</button><button data-mode="LEAGUE" class="mode">LEAGUE</button></div><div class="settingGrid"><label>Max players<select id="maxPlayers"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option></select></label><label>Turn timer<select id="turnTimer"><option value="0">Off</option><option value="30">30 sec</option><option value="60">60 sec</option><option value="120">120 sec</option><option value="300">300 sec</option></select></label></div><p class="muted small">Timer is stored and displayed. Timeout action is intentionally not invented until the rule is defined.</p><button id="confirmCreate" class="primary wide">CREATE ROOM</button></div>
+<div id="joinPanel" class="panel formPanel hidden"><h3>JOIN ROOM</h3><input id="roomCodeInput" maxlength="6" placeholder="6-character room code" autocapitalize="characters"><button id="confirmJoin" class="primary wide">JOIN ROOM</button></div></section>
+
+<section id="room" class="screen hidden"><header class="topbar"><button id="leaveRoom">← LEAVE</button><div><div class="eyebrow">ROOM</div><h2 id="roomCodeTitle">------</h2></div><span id="roomMode" class="pill">SIMPLE</span></header><div class="roomLayout"><div class="panel"><div class="roomCodeBig" id="roomCodeBig">------</div><p class="muted centerText">Share this code with your players.</p><div id="roomSettingsHost" class="settingsInline hidden"></div><h3>PLAYERS</h3><div id="players"></div><div class="roomButtons"><button id="readyBtn" class="primary">READY</button><button id="startBtn" class="hidden primary">START GAME</button><button id="roomSettingsBtn" class="hidden">ROOM SETTINGS</button></div></div><div class="panel chatPanel"><div class="panelHead"><h3>ROOM CHAT</h3><span>LIVE</span></div><div id="roomChat" class="chatLog"></div><form id="roomChatForm" class="chatForm"><input id="roomChatInput" maxlength="300" placeholder="Type a message…"><button>SEND</button></form></div></div></section>
+
+<section id="game" class="screen gameScreen hidden"><header class="topbar gameTop"><div><span id="turnLabel" class="turnPill">—</span><span id="phaseLabel" class="pill">—</span></div><div class="gameTopRight"><span id="directionLabel" class="pill">↻</span><button id="gameChatToggle">💬</button><button id="gameLeaveBtn">ROOM</button></div></header>
+<div class="gameLayout"><div class="table"><div id="pauseBanner" class="pauseBanner hidden"></div><div id="opponents" class="opponents"></div><div class="tableCenter"><div class="piles"><div class="pile"><small>DRAW</small><button id="drawPile" class="card backCard">🎪<i id="drawCount">112</i></button></div><div class="pile"><small>DISCARD</small><div id="discardCard" class="card"></div></div></div><div id="effectBar" class="effectBar"></div><div id="gameHint" class="gameHint"></div></div><div class="myArea"><div class="myLabel">YOUR HAND <span id="myCount"></span></div><div id="myHand" class="hand"></div></div><div class="gameActions"><button id="drawBtn" class="primary">DRAW</button><button id="passBtn" class="hidden">PASS</button><button id="circusBtn">CIRCUS!</button></div></div>
+<aside id="gameChat" class="panel gameChat"><div class="panelHead"><h3>CHAT</h3><button id="closeGameChat">×</button></div><div id="gameChatLog" class="chatLog"></div><form id="gameChatForm" class="chatForm"><input id="gameChatInput" maxlength="300"><button>SEND</button></form></aside></div></section>
+
+<section id="league" class="screen hidden"><header class="topbar"><button id="leagueBack">← HOME</button><h2>LEAGUE</h2><span></span></header><div class="leagueGrid"><div class="panel"><div class="leagueHeader"><div><div class="eyebrow">CURRENT SEASON</div><h3 id="seasonName">Season 1</h3></div><b>100 GAMES</b></div><div id="ranking"></div></div><div class="panel"><h3>SEASON HISTORY</h3><div id="seasonHistory"></div></div></div></section>
+
+<section id="profile" class="screen hidden"><header class="topbar"><button id="profileBack">← HOME</button><h2>PROFILE</h2><span></span></header><div class="profileGrid"><div class="panel formPanel"><div class="avatarXL" id="profileAvatar">🎪</div><label>In-game name<input id="profileDisplayName" maxlength="24"></label><label>Avatar<input id="profileAvatarInput" maxlength="4" placeholder="🎪"></label><button id="saveProfile" class="primary">SAVE PROFILE</button></div><div class="panel"><h3>MATCH HISTORY</h3><div id="matchHistory"></div></div></div></section>
+
+<section id="info" class="screen hidden"><header class="topbar"><button id="infoBack">← HOME</button><h2 id="infoTitle">HOW TO PLAY</h2><span></span></header><div class="panel infoPanel" id="infoBody"></div></section>
+
+<div id="modal" class="modal hidden"><div class="panel modalPanel"><button class="modalX" id="modalClose">×</button><h3 id="modalTitle">—</h3><div id="modalBody"></div></div></div>
+</main><script src="/socket.io/socket.io.js"></script><script src="/app.js"></script>
+</body></html>
