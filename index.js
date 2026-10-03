@@ -8,7 +8,10 @@ import {createUser,findUser,getUser,signToken,verifyPassword,verifyToken,newId} 
 import {initialState,visibleState,validateAction,applyAction,scoreGame} from './game.js';
 
 const app=express();const server=http.createServer(app);const io=new Server(server,{cors:{origin:true,credentials:true},maxHttpBufferSize:1e6});
-app.use(express.json({limit:'64kb'}));app.use(express.static(path.resolve('public')));
+app.use(express.json({limit:'64kb'}));
+app.get('/',(req,res)=>res.sendFile(path.resolve('index.html')));
+app.get('/app.js',(req,res)=>res.sendFile(path.resolve('app.js')));
+app.get('/style.css',(req,res)=>res.sendFile(path.resolve('style.css')));
 const now=()=>new Date().toISOString();
 const normUsername=s=>String(s||'').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,24);
 const authRate=new Map();
